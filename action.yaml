@@ -60,7 +60,7 @@ runs:
         mkdir -p ./.places/keys
         # Parse the keys input as YAML and extract key-value pairs
         echo "${{ inputs.keys }}" | yq -r 'to_entries | .[] | "\(.key) \(.value)"' | while read key value; do
-          echo "$value" > "./.places/keys/$key"
+          printf "%s" "$value" > "./.places/keys/$key"
         done
       shell: bash
 
