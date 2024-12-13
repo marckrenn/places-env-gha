@@ -13,7 +13,7 @@ inputs:
       A YAML dictionary of key-value pairs. Each key will become a file in ./places/keys, 
       and the file's contents will be the value.
       Example:
-        keys: |
+        keys:
           default: ${{ secrets.default }}
           prod: ${{ secrets.prod }}
     required: false
@@ -23,7 +23,7 @@ inputs:
     description: >
       A YAML list of environments to generate. 
       Example:
-        generate: |
+        generate:
           - local
           - prod
       This will run:
