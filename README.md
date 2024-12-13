@@ -37,7 +37,7 @@ This is the companion Github Action to [_places-env_](https://github.com/marckre
 | `version` | `String` | `"latest"` | ❌ | Specifies _places-env_ version to install. This can either be `"latest"` or a semantic version | Examples[^1] |
 | `keys` | `Block-list KV` | `""` | ❌ | Dictionary of key (filename) value (crypto key). These keys will be injected into `.places/keys`. **Note:** Must be in the exact format as the provided examples | Example[^2] |
 | `generate` | `String or Block-List` | `""` | ❌ | Environment (files) to generate | Examples[^3]|
-| `generate-all` | `Bool` | `""` | ❌ | Generates all environment files specified in [`places.yaml`](https://github.com/marckrenn/places-env/tree/main?tab=readme-ov-file#placesyaml)` | `generate-all: true` |
+| `generate-all` | `Bool` | `""` | ❌ | Generates all environment files specified in [`places.yaml`](https://github.com/marckrenn/places-env/tree/main?tab=readme-ov-file#placesyaml) | `generate-all: true` |
 
 
 [^1]: `version` examples:
