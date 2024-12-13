@@ -72,11 +72,23 @@ runs:
       if: ${{ inputs.generate-all == 'true' }}
       run: places generate environment --all
 
-    - name: Run places generate for listed environments
+    - name: Run places generate
       if: ${{ inputs.generate != '' && inputs.generate-all != 'true' }}
       run: |
-        # Parse the 'generate' input as a YAML list and join them with spaces
-        ENVIRONMENTS=$(echo "${{ inputs.generate }}" | yq -r '.[]' | xargs)
+        GENERATE_INPUT="${{ inputs.generate }}"
+
+        # Check if 'generate' is a YAML array
+        # The '-e' flag in yq returns a non-zero exit if the expression doesn't match.
+        # 'type=="array"' will succeed if the input is parsed as an array.
+        if echo "$GENERATE_INPUT" | yq -e 'type=="array"' > /dev/null 2>&1; then
+          # It's a YAML array. Extract items and join them with spaces.
+          ENVIRONMENTS=$(echo "$GENERATE_INPUT" | yq -r '.[]' | xargs)
+        else
+          # Not an array, treat it as a single string (single environment).
+          # Trim whitespace just in case.
+          ENVIRONMENTS=$(echo "$GENERATE_INPUT" | xargs)
+        fi
+
         places generate environment $ENVIRONMENTS
 
 branding:
