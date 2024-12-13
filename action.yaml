@@ -1,0 +1,84 @@
+name: "places-env"
+description: "Installs places-env, injects crypto keys, decrypts places.enc.yaml and generates environment(s)."
+author: "marckrenn"
+
+inputs:
+  version:
+    description: "Version specifier for places-env to install. For example: '==1.0.*'"
+    required: false
+    default: "latest"
+
+  keys:
+    description: >
+      A YAML dictionary of key-value pairs. Each key will become a file in ./places/keys, 
+      and the file's contents will be the value.
+      Example:
+        keys: |
+          default: ${{ secrets.default }}
+          prod: ${{ secrets.prod }}
+    required: false
+    default: ""
+
+  generate:
+    description: >
+      A YAML list of environments to generate. 
+      Example:
+        generate: |
+          - local
+          - prod
+      This will run:
+        places generate environment local prod
+      If empty and 'generate-all' is not 'true', no generation command is run.
+    required: false
+    default: ""
+
+  generate-all:
+    description: >
+      If set to 'true', runs 'places generate environment --all' instead of processing 'generate'.
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  shell: bash
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install places-env
+      run: |
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          pip install places-env
+        else
+          # Install using the provided version specifier (e.g. ==1.0.*)
+          pip install "places-env${{ inputs.version }}"
+        fi
+
+    - name: Write keys to files
+      if: ${{ inputs.keys != '' }}
+      run: |
+        mkdir -p ./places/keys
+        # Parse the keys input as YAML and extract key-value pairs
+        echo "${{ inputs.keys }}" | yq -r 'to_entries | .[] | "\(.key) \(.value)"' | while read key value; do
+          echo "$value" > "./places/keys/$key"
+        done
+
+    - name: Decrypt places.enc.yaml
+      run: places decrypt
+
+    - name: Run places generate all
+      if: ${{ inputs.generate-all == 'true' }}
+      run: places generate environment --all
+
+    - name: Run places generate for listed environments
+      if: ${{ inputs.generate != '' && inputs.generate-all != 'true' }}
+      run: |
+        # Parse the 'generate' input as a YAML list and join them with spaces
+        ENVIRONMENTS=$(echo "${{ inputs.generate }}" | yq -r '.[]' | xargs)
+        places generate environment $ENVIRONMENTS
+
+branding:
+  icon: "list"
+  color: "blue"
